@@ -2,6 +2,7 @@ import pygame
 import random
 from player import Player
 from constants import *
+from functions import *
 
 pygame.init()  
 pygame.display.set_caption("easy platformer")  # sets the window title
@@ -62,43 +63,6 @@ class Star:
             self.size = self.size + self.adder
             if self.size < 2 or self.size > 3:
                 self.adder *= -1
-
-
-
-class Platform:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.startY = y
-        self.offset = 0
-        self.adder = random.choice((-1, -0.5, 0, 0.5, 1))
-        
-        if random.randrange(1,6) == 1:
-            self.bounce = True
-            self.color = (206,99,255)
-        else:
-            self.bounce = False
-            self.color = (120, 244, 255)
-        
-    def draw(self):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, 200, 10))
-         
-    def collide(self, px, py):
-        if px + 20>self.x and px<self.x + 200 and py+20 >self.y and py+20 <self.y + 20:
-            return self.y - 20 
-        else:
-            return False
-        
-    def update(self, offset):
-        self.offset = offset
-        if self.x < -900 or self.x > 1700:
-            self.adder *= -1
-        if random.randrange(1,1199) == 1:
-            self.adder *= -1
-        self.x = self.x + offset + self.adder
-        
-        if self.y > self.startY:
-            self.y -= 1
         
 player = Player(screen,sounds)
 
@@ -111,12 +75,7 @@ for i in range(20):
     val = random.randrange(1, 40) + (40*i)
     enemies.append(Enemy(random.randrange(-1600, 2400), val))    
 
-plats = list()
-for i in range(40):
-    val = random.randrange(1, 40) + (20*i)
-    plats.append(Platform(random.randrange(-1600, 2400), val))
-
-
+plats = platsmaker()
 
 while not gameover: #GAME LOOP############################################################
     clock.tick(60) #FPS
@@ -156,8 +115,9 @@ while not gameover: #GAME LOOP##################################################
 
     offset = player.update(offset, plats,keys)
     
-    for j in range(len(plats)):
-        plats[j].update(offset)
+    for i in range(len(plats)):
+        for j in range(len(plats[i])):
+            plats[i][j].update(offset)
         
     for i in range(len(starbag)):
         starbag[i].update(offset / 2)
@@ -168,14 +128,12 @@ while not gameover: #GAME LOOP##################################################
     if player.ypos < -19:
         player.ypos =+ 750
         lvl += 1
-        plats = list()
-        for i in range(40):
-            val = random.randrange(1, 10) + (20*i)
-            plats.append(Platform(random.randrange(-1600, 2400), val))
-            plats[i].adder = (plats[i].adder * lvl / 4) + plats[i].adder
+        plats = platsmaker()
+
         starbag = list()
         for i in range(110 + (lvl * 10)):
             starbag.append(Star(random.randrange(-1600, 2400), random.randrange(0,800)))
+
         enemies = list()
         for i in range(40):
             val = random.randrange(1, 40) + (20*i)
@@ -188,14 +146,15 @@ while not gameover: #GAME LOOP##################################################
     screen.fill((fill,fill,fill)) #wipe screen so it doesn't smear
   
     
-    for i in range(len(starbag)):
-        starbag[i].draw()
+    for i in range(len(plats)):
+        for j in range(len(plats[i])):
+            plats[i][j].draw(screen)
         
     for i in range(len(enemies)):
         enemies[i].draw()
     
-    for i in range(len(plats)):
-        plats[i].draw()
+    for i in range(len(starbag)):
+        starbag[i].draw()
 
     player.draw(keys)
                    

@@ -80,22 +80,24 @@ class Player:
 
         # platform collision
         for i in range(len(plats)):
-             if plats[i].collide(self.xpos, self.ypos) != False and keys[DOWN] == False:
-                self.jumps = 1
-                if self.vy > 0:
-                    self.vy = 0
-                self.ypos = plats[i].collide(self.xpos, self.ypos)
-                self.isOnGround = True
-                if plats[i].bounce:
-                    plats[i].y += 10
-                    self.vy -= 15
-                else: 
-                    self.airJump = False
-                
-                if self.xpos > 300 and self.xpos < 700:
-                    self.xpos += plats[i].adder * 2
-                else:
-                    offset -= plats[i].adder * 2
+            for j in range(len(plats[i])):
+                if plats[i][j].collide(self.xpos, self.ypos) != False and keys[DOWN] == False:
+                    self.jumps = 1
+                    if self.vy > 0:
+                        self.vy = 0
+                    self.ypos = plats[i][j].collide(self.xpos, self.ypos)
+                    self.isOnGround = True
+                    if i == 1:
+                        print("bounce")
+                        plats[i][j].y += 10
+                        self.vy -= 15
+                    else: 
+                        self.airJump = False
+                    
+                    if self.xpos > 300 and self.xpos < 700:
+                        self.xpos += plats[i][j].adder * 2
+                    else:
+                        offset -= plats[i][j].adder * 2
 
 
         if self.ypos > 780:
