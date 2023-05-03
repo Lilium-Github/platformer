@@ -11,6 +11,9 @@ screen.fill((0,0,0))
 clock = pygame.time.Clock() #set up clock
 gameover = False #variable to run our game loop
 
+#FONTS
+font = pygame.font.Font('freesansbold.ttf', 32)
+
 offset = 0
 
 fill = 0
@@ -25,6 +28,8 @@ sounds = {"jump_sound" : pygame.mixer.Sound(jump),
 music = pygame.mixer.music.load('plats/graphics/music.wav')
 pygame.mixer.music.play(-1)
 
+text = font.render('Level: '+str(lvl), True, (200, 200, 0))
+
 class Enemy:
     def __init__(self, x, y):
         self.x = x
@@ -32,8 +37,10 @@ class Enemy:
         self.size = 16
         self.image = pygame.image.load('plats/graphics/enemy.png')
         self.dir = 0
+
     def draw(self):
         screen.blit(self.image, (self.x, self.y))
+        
     def update(self, offset):
         if self.dir == RIGHT:
             self.x += 4
@@ -113,7 +120,7 @@ while not gameover: #GAME LOOP##################################################
           
     #physics section--------------------------------------------------------------------    
 
-    offset = player.update(offset, plats,keys)
+    offset = player.update(offset, plats, keys)
     
     for i in range(len(plats)):
         for j in range(len(plats[i])):
@@ -144,7 +151,6 @@ while not gameover: #GAME LOOP##################################################
     # RENDER Section--------------------------------------------------------------------------------
             
     screen.fill((fill,fill,fill)) #wipe screen so it doesn't smear
-  
     
     for i in range(len(plats)):
         for j in range(len(plats[i])):
@@ -157,6 +163,9 @@ while not gameover: #GAME LOOP##################################################
         starbag[i].draw()
 
     player.draw(keys)
+
+    text = font.render("level: "+str(lvl), True, (10, 250, 10))#update score number
+    screen.blit(text, (140, 20))
                    
     pygame.display.flip()#this actually puts the pixel on the screen
     

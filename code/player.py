@@ -7,6 +7,8 @@ class Player:
         self.ypos = 700 #ypos of player
         self.vx = 0 #x velocity of player
         self.vy = 0 #y velocity of player
+        self.friction = 0.15
+        self.accel = 0.08
 
         # jumping variables
         self.isOnGround = False
@@ -24,6 +26,9 @@ class Player:
         # sounds
         self.jump_sound = sounds["jump_sound"]
         self.double_jump_sound = sounds["double_jump_sound"]
+
+
+        self.health = 3
 
     def draw(self, keys):
         # ANIMATION
@@ -49,32 +54,44 @@ class Player:
         self.screen.blit(self.sprite, (self.xpos, self.ypos), (self.framesize*self.frameNum, self.RowNum*self.framesize, self.framesize, self.framesize))
 
     def update(self, offset, plats, keys):
-        # left movement
-        if keys[LEFT]==True:
-            if self.xpos > 300:
-                self.vx = -5
-                offset = 0
-            else:
-                self.xpos = 300
-                offset = 5
-                self.vx = 0
-            self.direction = LEFT
-            
-        # right movement
-        elif keys[RIGHT]==True:
-            if self.xpos < 700:
-                self.vx = 5
-                offset = 0
-            else:
-                self.xpos = 700
-                self.vx = 0
-                offset = -5
-            self.direction = RIGHT
+        iceVal = self.iceCheck(plats[2])
 
-        # turn off velocity
+        if iceVal:
+            self.friction = -0.1
+            print("it's cold!")
         else:
-            self.vx = 0
-            offset = 0
+            self.friction = 0.2
+
+        offset = 0
+
+        if keys[LEFT]:
+            if self.vx > 0:
+                self.vx *= -.7
+            elif self.vx == 0:
+                self.vx = -2
+            self.vx -= self.accel
+        elif keys[RIGHT]:
+            if self.vx < 0:
+                self.vx *= -.7
+            elif self.vx == 0:
+                self.vx = 2
+            self.vx += self.accel
+        else:
+            if self.vx < 0:
+                self.vx += self.friction
+                if self.vx > -0.001:
+                    self.vx = 0
+            elif self.vx > 0:
+                self.vx -= self.friction
+                if self.vx < 0.001:
+                    self.vx = 0
+
+        if self.vx > 6:
+            self.vx = 6
+        elif self.vx < -6:
+            self.vx = -6
+        
+        self.xpos += self.vx
 
         self.isOnGround = False
 
@@ -94,11 +111,14 @@ class Player:
                     else: 
                         self.airJump = False
                     
-                    if self.xpos > 300 and self.xpos < 700:
-                        self.xpos += plats[i][j].adder * 2
-                    else:
-                        offset -= plats[i][j].adder * 2
+                    self.xpos += plats[i][j].adder *2
 
+        if self.xpos > 700:
+            offset = 700 - self.xpos
+            self.xpos = 700
+        elif self.xpos < 300:
+            offset = 300 - self.xpos
+            self.xpos = 300
 
         if self.ypos > 780:
             self.jumps = 1
@@ -126,19 +146,13 @@ class Player:
             self.vy+=.4 #notice this grows over time, aka ACCELERATION
             if keys[UP] == False:
                 self.airJump = True
-        if offset < 0:
-            offset+=.2
-        elif offset > 0:
-            offset-=.2
-        if self.vx < 0:
-            self.vx +=.2
-        elif self.vx > 0:
-            self.vx -= .2
-        
-        
-
-        #update player position
-        self.xpos+=self.vx 
+             
         self.ypos+=self.vy
-        
+
         return offset
+    
+    def iceCheck(self,icelist):
+        for i in range(len(icelist)):
+            if icelist[i].collide(self.xpos, self.ypos):
+                return True
+        return False
