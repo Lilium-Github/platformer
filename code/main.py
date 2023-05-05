@@ -1,6 +1,7 @@
 import pygame
 import random
 from player import Player
+from enemy import Enemy
 from constants import *
 from functions import *
 
@@ -30,31 +31,6 @@ pygame.mixer.music.play(-1)
 
 text = font.render('Level: '+str(lvl), True, (200, 200, 0))
 
-class Enemy:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.size = 16
-        self.image = pygame.image.load('plats/graphics/enemy.png')
-        self.dir = 0
-
-    def draw(self):
-        screen.blit(self.image, (self.x, self.y))
-        
-    def update(self, offset):
-        if self.dir == RIGHT:
-            self.x += 4
-        if self.dir == LEFT:
-            self.x -= 4
-        if self.dir == DOWN:
-            self.y += 4
-        if self.dir == UP:
-            self.y -= 4
-        self.x = self.x + offset
-        if random.randrange(1, 60) == 1:
-            self.dir = random.randrange(0,4)
-        
-
 class Star:
     def __init__(self, x, y):
         self.x = x
@@ -78,9 +54,9 @@ for i in range(100):
     starbag.append(Star(random.randrange(-1600, 2400), random.randrange(0,800)))
     
 enemies = list()
-for i in range(20):
-    val = random.randrange(1, 40) + (40*i)
-    enemies.append(Enemy(random.randrange(-1600, 2400), val))    
+for i in range(10):
+    val = 20 + (80*i)
+    enemies.append(Enemy(0, val, i % 2))    
 
 plats = platsmaker()
 
@@ -121,6 +97,10 @@ while not gameover: #GAME LOOP##################################################
     #physics section--------------------------------------------------------------------    
 
     offset = player.update(offset, plats, keys)
+    player.hurt(enemies)
+
+    if player.health < 1:
+        gameover = True
     
     for i in range(len(plats)):
         for j in range(len(plats[i])):
@@ -157,7 +137,7 @@ while not gameover: #GAME LOOP##################################################
             plats[i][j].draw(screen)
         
     for i in range(len(enemies)):
-        enemies[i].draw()
+        enemies[i].draw(screen)
     
     for i in range(len(starbag)):
         starbag[i].draw()

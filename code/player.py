@@ -9,6 +9,7 @@ class Player:
         self.vy = 0 #y velocity of player
         self.friction = 0.15
         self.accel = 0.08
+        self.size = 20
 
         # jumping variables
         self.isOnGround = False
@@ -27,7 +28,9 @@ class Player:
         self.jump_sound = sounds["jump_sound"]
         self.double_jump_sound = sounds["double_jump_sound"]
 
-
+        # damage vars
+        self.invincible = False
+        self.invincibleTimer = 0
         self.health = 3
 
     def draw(self, keys):
@@ -57,22 +60,21 @@ class Player:
         iceVal = self.iceCheck(plats[2])
 
         if iceVal:
-            self.friction = -0.1
-            print("it's cold!")
+            self.friction = -0.3
         else:
-            self.friction = 0.2
+            self.friction = 0.225
 
         offset = 0
 
         if keys[LEFT]:
             if self.vx > 0:
-                self.vx *= -.7
+                self.vx *= -1.1
             elif self.vx == 0:
                 self.vx = -2
             self.vx -= self.accel
         elif keys[RIGHT]:
             if self.vx < 0:
-                self.vx *= -.7
+                self.vx *= -1.1
             elif self.vx == 0:
                 self.vx = 2
             self.vx += self.accel
@@ -86,10 +88,11 @@ class Player:
                 if self.vx < 0.001:
                     self.vx = 0
 
-        if self.vx > 6:
-            self.vx = 6
-        elif self.vx < -6:
-            self.vx = -6
+        if not iceVal:
+            if self.vx > 6:
+                self.vx = 6
+            elif self.vx < -6:
+                self.vx = -6
         
         self.xpos += self.vx
 
@@ -98,11 +101,11 @@ class Player:
         # platform collision
         for i in range(len(plats)):
             for j in range(len(plats[i])):
-                if plats[i][j].collide(self.xpos, self.ypos) != False and keys[DOWN] == False:
+                if plats[i][j].collide(self.xpos, self.ypos, self.size) != False and keys[DOWN] == False:
                     self.jumps = 1
                     if self.vy > 0:
                         self.vy = 0
-                    self.ypos = plats[i][j].collide(self.xpos, self.ypos)
+                    self.ypos = plats[i][j].collide(self.xpos, self.ypos, self.size)
                     self.isOnGround = True
                     if i == 1:
                         print("bounce")
@@ -153,6 +156,22 @@ class Player:
     
     def iceCheck(self,icelist):
         for i in range(len(icelist)):
-            if icelist[i].collide(self.xpos, self.ypos):
+            if icelist[i].collide(self.xpos, self.ypos, self.size):
                 return True
         return False
+    
+    def hurt(self, enemies):
+        for index, enemy in enumerate(enemies):
+            if enemy.collide(self.xpos, self.ypos, self.size) and not self.invincible:
+                print("ow!", self.health)
+                self.health -= 1
+
+                del enemy
+
+                self.invincible = True
+                self.invincibleTimer = 10
+
+        if self.invincibleTimer > 0:
+            self.invincibleTimer -= 1
+        else:
+            self.invincible = False

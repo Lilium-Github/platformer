@@ -4,17 +4,19 @@ from constants import *
 
 class Platform:
     def __init__(self, x, y):
+        # Position Vars
         self.x = x
         self.y = y
         self.startY = y
+        self.width = 90
+        self.height = 15
+
+        # Movement Vars
         self.offset = 0
         self.adder = random.choice((-1, -0.5, 0, 0.5, 1))
-        
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, (self.x, self.y, 200, 10))
          
-    def collide(self, px, py):
-        if px + 20>self.x and px<self.x + 200 and py+20 >self.y and py+20 <self.y + 20:
+    def collide(self, px, py, psize):
+        if px + psize>self.x and px<self.x + self.width and py+psize >self.y and py+psize <self.y + psize:
             return self.y - 20 
         else:
             return False
